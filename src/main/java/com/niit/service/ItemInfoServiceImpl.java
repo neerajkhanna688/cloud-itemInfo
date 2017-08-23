@@ -1,21 +1,44 @@
 package com.niit.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.ribbon.proxy.annotation.Hystrix;
+import com.niit.model.Item;
+import com.niit.repository.ItemRepositoryCrudInterface;
 
 @Service
 public class ItemInfoServiceImpl implements ItemInfoService{
 
+	@Autowired
+	ItemRepositoryCrudInterface itemRepository;
+	
 	@Override
 	@HystrixCommand(fallbackMethod="reliable")
-	public String getItemInfo(Integer Id) throws Exception {
-    	Thread.sleep(60000);
-        	throw new Exception(" TimeOut After 1 min ");
+	public Item getItemInfo(Integer id) throws Exception {
+		return (Item)itemRepository.findOne(id);
 	}
 
-	  public String reliable(Integer Id) {
-		    return "  returning value from fallback method";
-		  }
+	  public Item reliable(Integer id) {
+		  Item item = new Item();
+		  item.setId(id);item.setBrand("234");
+		  item.setModel("wer");
+		  item.setWeight("22");
+          return item;
+	  }
+	@Override
+	@Transactional
+	public Item saveItem(Item item) throws Exception {
+		return itemRepository.save(item);
+		
+	}
+
+	@Override
+	public Iterable<Item> getItems() throws Exception {
+		return itemRepository.findAll();
+	}
+	
+	
+
 }
